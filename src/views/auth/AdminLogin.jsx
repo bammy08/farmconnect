@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
 
 import logo from '../../images/farmer.png';
+import { admin_login } from '../../store/Reducers/authReducer';
 
 const AdminLogin = () => {
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -48,6 +52,7 @@ const AdminLogin = () => {
 
     // If no errors, proceed with form submission
     // Your form submission logic here
+    dispatch(admin_login(formData));
   };
 
   return (
