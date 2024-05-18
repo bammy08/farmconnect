@@ -1,12 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { PulseLoader } from 'react-spinners';
+import { toast } from 'react-hot-toast';
 
 import logo from '../../images/farmer.png';
-import { admin_login } from '../../store/Reducers/authReducer';
+import { admin_login, messageClear } from '../../store/Reducers/authReducer';
 
 const AdminLogin = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { loader, errorMessage, successMessage } = useSelector(
+    (state) => state.auth
+  );
 
   const [formData, setFormData] = useState({
     email: '',
@@ -54,6 +61,25 @@ const AdminLogin = () => {
     // Your form submission logic here
     dispatch(admin_login(formData));
   };
+  const overrideStyles = {
+    display: 'flex',
+    margin: '0 auto',
+    height: '24px',
+    justifyContent: 'center',
+    alignItem: 'center',
+  };
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      navigate('/');
+    }
+  }, [errorMessage, successMessage]);
 
   return (
     <div className="min-w-screen min-h-screen bg-[#afe1af] flex justify-center items-center">
@@ -108,10 +134,11 @@ const AdminLogin = () => {
             </div>
 
             <button
+              disabled={loader ? true : false}
               type="submit"
               className="bg-green-200 text-black px-4 py-2 w-full rounded-md hover:shadow-lg"
             >
-              Login
+              {loader ? <PulseLoader cssOverride={overrideStyles} /> : 'Login'}
             </button>
           </form>
         </div>
