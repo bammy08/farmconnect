@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 
 import logo from '../../images/farmer.png';
 import { admin_login, messageClear } from '../../store/Reducers/authReducer';
+import { overrideStyles } from '../../utils/utils';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -60,13 +61,6 @@ const AdminLogin = () => {
     // If no errors, proceed with form submission
     // Your form submission logic here
     dispatch(admin_login(formData));
-  };
-  const overrideStyles = {
-    display: 'flex',
-    margin: '0 auto',
-    height: '24px',
-    justifyContent: 'center',
-    alignItem: 'center',
   };
 
   useEffect(() => {
@@ -136,7 +130,7 @@ const AdminLogin = () => {
             <button
               disabled={loader ? true : false}
               type="submit"
-              className="bg-green-200 text-black px-4 py-2 w-full rounded-md hover:shadow-lg"
+              className="bg-orange-500 w-full hover:shadow-orange-700/40 hover:shadow-md text-white rounded-md px-7 py-2 my-2"
             >
               {loader ? <PulseLoader cssOverride={overrideStyles} /> : 'Login'}
             </button>

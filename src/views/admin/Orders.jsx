@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LuArrowDownSquare } from 'react-icons/lu';
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination';
+import Search from '../components/Search';
 
 const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -12,21 +13,7 @@ const Orders = () => {
   return (
     <div className="px-2 lg:px-7 pt-5 ">
       <div className="w-full p-4 bg-[#0ea018] rounded-md">
-        <div className="flex justify-between items-center">
-          <select
-            onChange={(e) => setParPage(parseInt(e.target.value))}
-            className="px-4 py-2 focus:border-orange-600 outline-none bg-[#88f18f] border border-green-800 rounded-md text-black"
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </select>
-          <input
-            className="px-4 py-2 focus:border-orange-600 outline-none bg-[#88f18f] border border-green-800 rounded-md text-black"
-            type="text"
-            placeholder="search"
-          />
-        </div>
+        <Search />
         <div className="relative mt-5 overflow-x-auto">
           <div className="w-full text-sm text-left text-white">
             <div className="text-sm text-white uppercase border-b border-slate-700">
@@ -50,11 +37,11 @@ const Orders = () => {
                 <div className="py-3 w-[18%] font-medium">Pending</div>
                 <div className="py-3 w-[18%] font-medium">Pending</div>
                 <div className="py-3 w-[18%] font-medium">
-                  <Link>View</Link>
+                  <Link to="/admin/dashboard/order-details/3">View</Link>
                 </div>
                 <div
                   onClick={(e) => setShow(!show)}
-                  className="py-3 w-[8%] font-bold"
+                  className="py-3 w-[8%] font-bold cursor-pointer"
                 >
                   <LuArrowDownSquare size={20} />
                 </div>
@@ -97,7 +84,7 @@ const Orders = () => {
                 </div>
                 <div
                   onClick={(e) => setShow(!show)}
-                  className="py-3 w-[8%] font-bold"
+                  className="py-3 w-[8%] font-bold cursor-pointer"
                 >
                   <LuArrowDownSquare size={20} />
                 </div>

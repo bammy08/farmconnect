@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  MdOutlineKeyboardArrowLeft,
   MdOutlineKeyboardDoubleArrowLeft,
   MdOutlineKeyboardDoubleArrowRight,
 } from 'react-icons/md';

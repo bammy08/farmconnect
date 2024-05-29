@@ -17,7 +17,7 @@ const Header = ({ showSidebar, setShowSidebar }) => {
 
         <div className="hidden md:block">
           <input
-            className="px-3 py-2 outline-none focus:border-green-300 border bg-transparent border-orange-700 rounded-md text-white overflow-hidden"
+            className="px-3 py-2 outline-none focus:border-green-600 border bg-gray-100 border-orange-700 rounded-md text-gray-700 overflow-hidden"
             type="text"
             name="search"
             placeholder="Search"

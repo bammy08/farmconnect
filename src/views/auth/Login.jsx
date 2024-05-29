@@ -1,8 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { PulseLoader } from 'react-spinners';
+import { overrideStyles } from '../../utils/utils';
+import { useDispatch, useSelector } from 'react-redux';
+import { messageClear, seller_login } from '../../store/Reducers/authReducer';
+import toast from 'react-hot-toast';
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loader, successMessage, errorMessage } = useSelector(
+    (state) => state.auth
+  );
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -44,10 +54,22 @@ const Login = () => {
       setErrors(newErrors);
       return;
     }
+    dispatch(seller_login(formData));
 
     // If no errors, proceed with form submission
     // Your form submission logic here
   };
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      navigate('/');
+    }
+  }, [successMessage, errorMessage]);
 
   return (
     <div className="min-w-screen min-h-screen bg-[#afe1af] flex justify-center items-center">
@@ -102,15 +124,16 @@ const Login = () => {
 
             <div className="flex justify-center gap-2 mb-3 ">
               <p>Not yet registered?</p>
-              <Link className="text-orange-300 font-bold" to={'/register'}>
+              <Link className="text-green-800 font-bold" to={'/register'}>
                 Register
               </Link>
             </div>
             <button
+              disabled={loader ? true : false}
               type="submit"
-              className="bg-green-200 text-black px-4 py-2 w-full rounded-md hover:shadow-lg"
+              className="bg-orange-500 w-full hover:shadow-orange-700/40 hover:shadow-md text-white rounded-md px-7 py-2 my-2"
             >
-              Login
+              {loader ? <PulseLoader cssOverride={overrideStyles} /> : 'Login'}
             </button>
           </form>
         </div>

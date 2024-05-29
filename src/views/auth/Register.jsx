@@ -1,8 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { PulseLoader } from 'react-spinners';
+import { overrideStyles } from '../../utils/utils';
+import {
+  messageClear,
+  seller_register,
+} from '../../store/Reducers/authReducer';
+import toast from 'react-hot-toast';
 
 const Register = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loader, successMessage, errorMessage } = useSelector(
+    (state) => state.auth
+  );
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -30,7 +43,6 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     // Perform validation
     const newErrors = {};
     if (!formData.username) {
@@ -48,10 +60,22 @@ const Register = () => {
       setErrors(newErrors);
       return;
     }
+    dispatch(seller_register(formData));
 
     // If no errors, proceed with form submission
     // Your form submission logic here
   };
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      navigate('/');
+    }
+  }, [successMessage, errorMessage]);
 
   return (
     <div className="min-w-screen min-h-screen bg-[#afe1af] flex justify-center items-center">
@@ -131,15 +155,20 @@ const Register = () => {
             </div>
             <div className="flex justify-center gap-2 mb-3">
               <p>Already registered?</p>
-              <Link className="text-orange-300 font-bold" to={'/login'}>
+              <Link className="text-green-800 font-bold" to={'/login'}>
                 Login
               </Link>
             </div>
             <button
+              disabled={loader ? true : false}
               type="submit"
-              className="bg-green-200 text-black px-4 py-2 w-full rounded-md hover:shadow-lg"
+              className="bg-orange-500 w-full hover:shadow-orange-700/40 hover:shadow-md text-white rounded-md px-7 py-2 my-2"
             >
-              Register
+              {loader ? (
+                <PulseLoader cssOverride={overrideStyles} />
+              ) : (
+                'Register'
+              )}
             </button>
           </form>
         </div>
