@@ -1,34 +1,40 @@
-import React, { useState } from 'react';
-
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination';
 import { FaEye } from 'react-icons/fa6';
+import Search from '../components/Search';
+import { get_seller_request } from '../../store/Reducers/sellerReducer';
 
 const SellerRequest = () => {
+  const dispatch = useDispatch();
+  const { sellers, totalSeller } = useSelector((state) => state.seller);
+
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [parPage, setParPage] = useState(5);
   const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    dispatch(
+      get_seller_request({
+        parPage,
+        searchValue,
+        page: currentPage,
+      })
+    );
+  }, [parPage, searchValue, currentPage, dispatch]);
+
   return (
     <div className="px-2 lg:px-7 pt-5">
       <h2 className="text-lg mb-3 font-semibold"> Seller Request</h2>
 
       <div className="w-full p-4 bg-[#0ea018] rounded-md">
-        <div className="flex justify-between items-center">
-          <select
-            onChange={(e) => setParPage(parseInt(e.target.value))}
-            className="px-4 py-2 focus:border-orange-600 outline-none bg-[#88f18f] border border-green-800 rounded-md text-black"
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </select>
-          <input
-            className="px-4 py-2 focus:border-orange-600 outline-none bg-gray-100 border border-green-800 rounded-md text-gray-700"
-            type="text"
-            placeholder="search"
-          />
-        </div>
+        <Search
+          setParPage={setParPage}
+          setSearchValue={setSearchValue}
+          searchValue={searchValue}
+        />
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left text-white">
             <thead className="text-sm text-white uppercase border-b border-slate-700">
@@ -58,40 +64,40 @@ const SellerRequest = () => {
               </tr>
             </thead>
             <tbody>
-              {[1, 2, 3, 4, 5].map((d, i) => (
+              {sellers.map((d, i) => (
                 <tr className="border-b border-gray-600" key={i}>
                   <td
                     scope="row"
                     className="py-2 px-4 font-medium whitespace-nowrap"
                   >
-                    {d}
+                    {i + 1}
                   </td>
 
                   <td
                     scope="row"
                     className="py-2 px-4 font-medium whitespace-nowrap"
                   >
-                    Bamidele
+                    {d.username}
                   </td>
 
                   <td
                     scope="row"
                     className="py-2 px-4 font-medium whitespace-nowrap"
                   >
-                    olusolabamidele33@gmail.com
+                    {d.email}
                   </td>
                   <td
                     scope="row"
                     className="py-2 px-4 font-medium whitespace-nowrap"
                   >
-                    <span>inactive</span>
+                    <span>{d.payment}</span>
                   </td>
 
                   <td
                     scope="row"
                     className="py-2 px-4 font-medium whitespace-nowrap"
                   >
-                    Pending
+                    {d.status}
                   </td>
 
                   <td
@@ -100,7 +106,7 @@ const SellerRequest = () => {
                   >
                     <div className="flex justify-start items-center gap-4">
                       <Link
-                        to="/admin/dashboard/seller-details/2"
+                        to={`/admin/dashboard/seller-details/${d._id}`}
                         className="p-2 bg-green-200 rounded text-gray-600 cursor-pointer "
                       >
                         <FaEye />
