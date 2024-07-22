@@ -22,6 +22,8 @@ app.use('/api', require('./routes/categoryRoutes'));
 app.use('/api', require('./routes/productRoutes'));
 app.use('/api', require('./routes/sellerRoutes'));
 
+app.use('/api/home', require('./routes/home/homeRoutes'));
+
 app.get('/', (req, res) => res.send('my backend'));
 const port = process.env.PORT;
 dbConnect();

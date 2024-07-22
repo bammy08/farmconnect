@@ -30,14 +30,15 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
-    location: {
+    state: {
       type: String,
       required: true,
     },
-    description: {
+    city: {
       type: String,
       required: true,
     },
+
     stock: {
       type: Number,
       required: true,
@@ -66,10 +67,19 @@ productSchema.index(
   {
     name: 'text',
     category: 'text',
-    location: 'text',
+    state: 'text',
+    city: 'text',
     description: 'text',
   },
-  { weights: { name: '5', category: '4', location: '3', description: '2' } }
+  {
+    weights: {
+      name: 5,
+      category: 4,
+      state: 3,
+      city: 2,
+      description: 1,
+    },
+  }
 );
 
 module.exports = model('Products', productSchema);

@@ -13,8 +13,17 @@ class ProductController {
         return responseReturn(res, 500, { error: 'Form parsing error' });
       }
 
-      let { name, category, description, location, stock, discount, shopName } =
-        fields;
+      let {
+        name,
+        category,
+        description,
+        state,
+        city,
+        stock,
+        discount,
+        shopName,
+      } = fields;
+
       let prices = [];
       if (fields.prices) {
         try {
@@ -28,6 +37,9 @@ class ProductController {
       // Trim name to avoid leading/trailing spaces and generate slug
       name = name.trim();
       const slug = name.split(' ').join('-').toLowerCase();
+
+      // Set discount to 0 if not provided
+      discount = discount ? parseInt(discount, 10) : 0;
 
       cloudinary.config({
         cloud_name: process.env.CLOUD_NAME,
@@ -63,9 +75,10 @@ class ProductController {
           shopName,
           category: category.trim(),
           description: description.trim(),
-          location: location.trim(),
+          state,
+          city,
           stock: parseInt(stock, 10),
-          discount: parseInt(discount, 10),
+          discount,
           prices,
           images: imageUrl,
         });
@@ -79,7 +92,6 @@ class ProductController {
   };
 
   // get the products from database
-
   get_product = async (req, res) => {
     const { page, searchValue, parPage } = req.query;
     const { id } = req;
@@ -137,7 +149,8 @@ class ProductController {
       discount,
       prices,
       category,
-      location,
+      state,
+      city,
       productId,
       stock,
     } = req.body;
@@ -159,8 +172,8 @@ class ProductController {
         discount,
         prices,
         category,
-        location,
-        productId,
+        state,
+        city,
         stock,
         slug,
       });
@@ -168,7 +181,7 @@ class ProductController {
       const product = await productModel.findById(productId);
       responseReturn(res, 200, {
         product,
-        message: 'product updated successfully',
+        message: 'Product updated successfully',
       });
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
@@ -204,10 +217,10 @@ class ProductController {
             const product = await productModel.findById(productId);
             responseReturn(res, 200, {
               product,
-              message: 'product image updated successfully',
+              message: 'Product image updated successfully',
             });
           } else {
-            responseReturn(res, 404, { error: 'image upload failed' });
+            responseReturn(res, 404, { error: 'Image upload failed' });
           }
         } catch (error) {
           responseReturn(res, 404, { error: error.message });
