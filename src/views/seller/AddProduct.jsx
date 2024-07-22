@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { location } from '../../data';
+
 import { MdAddAPhoto } from 'react-icons/md';
 import { FaWindowClose } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,6 +9,7 @@ import { addProduct, messageClear } from '../../store/Reducers/productReducer';
 import toast from 'react-hot-toast';
 import { PulseLoader } from 'react-spinners';
 import { overrideStyles } from '../../utils/utils';
+import { location } from '../../utils/location';
 
 const AddProduct = () => {
   const dispatch = useDispatch();
@@ -25,7 +26,6 @@ const AddProduct = () => {
   const [showLoc, setShowLoc] = useState(false);
   const [locations, setLocations] = useState('');
   const [searchLocValue, setSearchLocValue] = useState('');
-  const [allLocation, setAllLocation] = useState(Object.keys(location));
   const [filteredCities, setFilteredCities] = useState([]);
 
   const [images, setImages] = useState([]);
@@ -38,6 +38,8 @@ const AddProduct = () => {
     name: '',
     description: '',
     discount: '',
+    selectedState: '', // new state for selected state
+    selectedCity: '', // new state for selected city
     prices: [],
     stock: '',
   });
@@ -92,30 +94,31 @@ const AddProduct = () => {
     }
   };
 
-  const locationSearch = (e) => {
-    const value = e.target.value;
-    setSearchLocValue(value);
-    if (value) {
-      let valueSearch = allLocation.filter(
-        (loc) => loc.toLowerCase().indexOf(value.toLowerCase()) > -1
-      );
-      setAllLocation(valueSearch);
-    } else {
-      setAllLocation(Object.keys(location));
-    }
+  // Function to handle state selection
+  const handleStateSelect = (e) => {
+    const selectedState = e.target.value;
+    setState({
+      ...state,
+      selectedState,
+      selectedCity: '', // Clear selected city when state changes
+    });
   };
 
-  const handleStateClick = (stateName) => {
-    setLocations(stateName);
-    setFilteredCities(location[stateName]);
-    setSearchLocValue('');
-    setAllLocation(Object.keys(location));
-    setShowLoc(false);
+  // Function to handle city selection
+  const handleCitySelect = (e) => {
+    const selectedCity = e.target.value;
+    setState({
+      ...state,
+      selectedCity,
+    });
   };
 
-  const handleCityClick = (cityName) => {
-    setLocations(locations + ', ' + cityName);
-    setFilteredCities([]);
+  // Filter cities based on selected state
+  const getCitiesForSelectedState = () => {
+    const selectedStateData = location.find(
+      (loc) => loc.state === state.selectedState
+    );
+    return selectedStateData ? selectedStateData.cities : [];
   };
 
   const imageHandle = (e) => {
@@ -167,7 +170,8 @@ const AddProduct = () => {
     formData.append('stock', state.stock);
     formData.append('discount', state.discount);
     formData.append('category', category);
-    formData.append('location', locations);
+    formData.append('state', state.selectedState);
+    formData.append('city', state.selectedCity);
     formData.append('shopName', 'Chiko Farms');
 
     formData.append('prices', JSON.stringify(state.prices));
@@ -191,12 +195,13 @@ const AddProduct = () => {
         description: '',
         discount: '',
         stock: '',
+        selectedState: '',
+        selectedCity: '',
         prices: [],
       });
       setImageShow([]);
       setImages([]);
       setCategory('');
-      setLocations('');
     }
   }, [successMessage, errorMessage]);
 
@@ -206,7 +211,7 @@ const AddProduct = () => {
         <div className="flex justify-between items-center pb-4">
           <h1 className="text-gray-100 text-lg font-semibold">Add Product</h1>
           <Link
-            to="/seller/dashboard/all-state"
+            to="/seller/dashboard/all-product"
             className="bg-green-200 hover:shadow-lg hover:shadow-green-500/50 text-gray-600 px-3 py-2 rounded-md"
           >
             All Products
@@ -409,62 +414,38 @@ const AddProduct = () => {
                 />
               </div>
 
-              <div className="flex flex-col w-full gap-1 relative mb-3">
-                <label className="text-lg font-semibold" htmlFor="Location">
-                  Location
-                </label>
-                <input
-                  readOnly
-                  onClick={() => setShowLoc(!showLoc)}
-                  onChange={inputHandle}
-                  value={locations}
+              <div className="flex flex-col w-full gap-1 relative">
+                <label htmlFor="state">State</label>
+                <select
                   className="px-4 py-2 focus:border-orange-600 outline-none bg-gray-100 border border-green-800 rounded-md text-gray-700"
-                  type="text"
-                  id="location"
-                  placeholder="--select a location--"
-                />
-                <div
-                  className={`absolute top-[101%] bg-green-400 transition-all w-full ${
-                    showLoc ? 'scale-100' : 'scale-0'
-                  }`}
+                  value={state.selectedState}
+                  onChange={handleStateSelect}
                 >
-                  <div className="w-full px-4 fixed py-2 text-gray-700">
-                    <input
-                      onChange={locationSearch}
-                      value={searchLocValue}
-                      className="px-3 py-1 focus:border-green-600 outline-none border border-green-400 rounded-md text-gray-600 overflow-hidden w-full"
-                      type="text"
-                      placeholder="search"
-                    />
+                  <option value="">-- Select State --</option>
+                  {location.map((loc) => (
+                    <option key={loc.state} value={loc.state}>
+                      {loc.state}
+                    </option>
+                  ))}
+                </select>
+
+                {state.selectedState && (
+                  <div>
+                    <label htmlFor="city">City</label>
+                    <select
+                      className="px-4 py-2 focus:border-orange-600 outline-none bg-gray-100 border border-green-800 rounded-md text-gray-700"
+                      value={state.selectedCity}
+                      onChange={handleCitySelect}
+                    >
+                      <option value="">-- Select City --</option>
+                      {getCitiesForSelectedState().map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="pt-14"></div>
-                  <div className="flex justify-start items-start flex-col h-[200px] overflow-y-scroll text-gray-700">
-                    {filteredCities.length === 0
-                      ? allLocation.map((loc, i) => (
-                          <span
-                            key={i}
-                            className={`px-4 py-2 hover:bg-green-500 hover:shadow-lg w-full cursor-pointer ${
-                              locations === loc && 'bg-green-600 text-gray-100'
-                            }`}
-                            onClick={() => handleStateClick(loc)}
-                          >
-                            {loc}
-                          </span>
-                        ))
-                      : filteredCities.map((city, i) => (
-                          <span
-                            key={i}
-                            className={`px-4 py-2 hover:bg-green-500 hover:shadow-lg w-full cursor-pointer ${
-                              locations.includes(city) &&
-                              'bg-green-600 text-gray-100'
-                            }`}
-                            onClick={() => handleCityClick(city)}
-                          >
-                            {city}
-                          </span>
-                        ))}
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="flex flex-col mb-3  w-full text-gray-700">

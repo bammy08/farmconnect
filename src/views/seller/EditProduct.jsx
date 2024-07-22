@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { category, location } from '../../data';
 import { MdAddAPhoto } from 'react-icons/md';
 import { FaWindowClose } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +13,7 @@ import {
 import { PulseLoader } from 'react-spinners';
 import { overrideStyles } from '../../utils/utils';
 import toast from 'react-hot-toast';
+import { location } from '../../utils/location';
 
 const EditProduct = () => {
   const { productId } = useParams();
@@ -28,11 +28,8 @@ const EditProduct = () => {
   const [searchValue, setSearchValue] = useState('');
   const [allCategory, setAllCategory] = useState(category);
 
-  const [showLoc, setShowLoc] = useState(false);
-  const [locations, setLocations] = useState('');
-  const [searchLocValue, setSearchLocValue] = useState('');
-  const [allLocation, setAllLocation] = useState(Object.keys(location));
-  const [filteredCities, setFilteredCities] = useState([]);
+  const [stateValue, setStateValue] = useState('');
+  const [cityValue, setCityValue] = useState('');
 
   const [images, setImages] = useState([]);
   const [imageShow, setImageShow] = useState([]);
@@ -45,6 +42,8 @@ const EditProduct = () => {
     discount: '',
     prices: [],
     stock: '',
+    selectedState: '', // New state for selected state
+    selectedCity: '', // New state for selected city
   });
 
   const inputHandle = (e) => {
@@ -98,32 +97,6 @@ const EditProduct = () => {
     }
   }, [categories]);
 
-  const locationSearch = (e) => {
-    const value = e.target.value;
-    setSearchLocValue(value);
-    if (value) {
-      let valueSearch = allLocation.filter(
-        (loc) => loc.toLowerCase().indexOf(value.toLowerCase()) > -1
-      );
-      setAllLocation(valueSearch);
-    } else {
-      setAllLocation(Object.keys(location));
-    }
-  };
-
-  const handleStateClick = (stateName) => {
-    setLocations(stateName);
-    setFilteredCities(location[stateName]);
-    setSearchLocValue('');
-    setAllLocation(Object.keys(location));
-    setShowLoc(false);
-  };
-
-  const handleCityClick = (cityName) => {
-    setLocations(locations + ', ' + cityName);
-    setFilteredCities([]);
-  };
-
   const changeImage = (img, files) => {
     if (files.length > 0) {
       dispatch(
@@ -151,9 +124,10 @@ const EditProduct = () => {
       discount: product.discount || '',
       prices: product.prices || [],
       stock: product.stock || '',
+      selectedState: product.state || '', // Update with the actual state field from your product object
+      selectedCity: product.city || '', // Update with the actual city field from your product object
     });
     setCategory(product.category || '');
-    setLocations(product.location || '');
     setImageShow(product.images || []);
   }, [product]);
 
@@ -177,12 +151,27 @@ const EditProduct = () => {
       prices: JSON.stringify(state.prices),
       stock: state.stock,
       category,
-      location: locations,
+      state: state.selectedState, // Update with the actual state field
+      city: state.selectedCity,
       images,
       productId,
     };
 
     dispatch(update_product(obj));
+  };
+  const handleStateChange = (e) => {
+    const selectedState = e.target.value;
+    setStateValue(selectedState);
+    const cities =
+      location.find((loc) => loc.state === selectedState)?.cities || [];
+    setCityValue('');
+    setState({ ...state, selectedState, selectedCity: '' });
+  };
+
+  const handleCityChange = (e) => {
+    const selectedCity = e.target.value;
+    setCityValue(selectedCity);
+    setState({ ...state, selectedCity });
   };
 
   return (
@@ -395,62 +384,50 @@ const EditProduct = () => {
                 />
               </div>
 
-              <div className="flex flex-col w-full gap-1 relative mb-3">
-                <label className="text-lg font-semibold" htmlFor="Location">
-                  Location
-                </label>
-                <input
-                  readOnly
-                  onClick={() => setShowLoc(!showLoc)}
-                  onChange={inputHandle}
-                  value={locations}
-                  className="px-4 py-2 focus:border-orange-600 outline-none bg-gray-100 border border-green-800 rounded-md text-gray-700"
-                  type="text"
-                  id="location"
-                  placeholder="--select a location--"
-                />
-                <div
-                  className={`absolute top-[101%] bg-green-400 transition-all w-full ${
-                    showLoc ? 'scale-100' : 'scale-0'
-                  }`}
+              <div className="flex flex-col w-full gap-1 mt-3">
+                <label
+                  className="text-lg font-semibold"
+                  htmlFor="Product State"
                 >
-                  <div className="w-full px-4 fixed py-2 text-gray-700">
-                    <input
-                      onChange={locationSearch}
-                      value={searchLocValue}
-                      className="px-3 py-1 focus:border-green-600 outline-none border border-green-400 rounded-md text-gray-600 overflow-hidden w-full"
-                      type="text"
-                      placeholder="search"
-                    />
-                  </div>
-                  <div className="pt-14"></div>
-                  <div className="flex justify-start items-start flex-col h-[200px] overflow-y-scroll text-gray-700">
-                    {filteredCities.length === 0
-                      ? allLocation.map((loc, i) => (
-                          <span
-                            key={i}
-                            className={`px-4 py-2 hover:bg-green-500 hover:shadow-lg w-full cursor-pointer ${
-                              locations === loc && 'bg-green-600 text-gray-100'
-                            }`}
-                            onClick={() => handleStateClick(loc)}
-                          >
-                            {loc}
-                          </span>
-                        ))
-                      : filteredCities.map((city, i) => (
-                          <span
-                            key={i}
-                            className={`px-4 py-2 hover:bg-green-500 hover:shadow-lg w-full cursor-pointer ${
-                              locations.includes(city) &&
-                              'bg-green-600 text-gray-100'
-                            }`}
-                            onClick={() => handleCityClick(city)}
-                          >
-                            {city}
-                          </span>
-                        ))}
-                  </div>
-                </div>
+                  State
+                </label>
+                <select
+                  onChange={handleStateChange}
+                  value={state.selectedState}
+                  className="px-4 py-2 mb-3 focus:border-orange-600 outline-none bg-gray-100 border border-green-800 rounded-md text-gray-700"
+                  name="selectedState"
+                  id="selectedState"
+                >
+                  <option value="">Select State</option>
+                  {location.map((loc) => (
+                    <option key={loc.state} value={loc.state}>
+                      {loc.state}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col w-full gap-1 mt-3">
+                <label className="text-lg font-semibold" htmlFor="Product City">
+                  City
+                </label>
+                <select
+                  onChange={handleCityChange}
+                  value={state.selectedCity}
+                  className="px-4 py-2 mb-3 focus:border-orange-600 outline-none bg-gray-100 border border-green-800 rounded-md text-gray-700"
+                  name="selectedCity"
+                  id="selectedCity"
+                  disabled={!state.selectedState}
+                >
+                  <option value="">Select City</option>
+                  {stateValue &&
+                    location
+                      .find((loc) => loc.state === stateValue)
+                      ?.cities.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                </select>
               </div>
 
               <div className="flex flex-col mb-3  w-full text-gray-700">

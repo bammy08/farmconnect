@@ -101,7 +101,7 @@ const AllProducts = () => {
                     scope="row"
                     className="py-1 px-4 font-medium whitespace-nowrap"
                   >
-                    {d.location}
+                    {d.state},{d.city}
                   </td>
                   <td
                     scope="row"
